@@ -110,45 +110,26 @@ public abstract class ArrayUtils {
                     sources.add((ArrayList<Object>) datum);
                 }
 
-                //Arrays.asList((<T[]>)datum) says incompatible bounds, have to resort to this fuckery
-                //Can't even use my own goddamn toObjectArray to filter it. Ah well, I guess this is more efficient..
-                //grumble grumble
+                //Cleaned this up. I've forgotten my java lol
 
-                else if (datum instanceof int[]) {
-                    for (int i = 0; i < ((int[]) datum).length; i++) {
-                        tempData.add(((int[]) datum)[i]);
+                else {
+
+                    if (datum.getClass().getComponentType().isPrimitive()) {
+                        for (int i = 0; i < Array.getLength(datum); i++) {
+                            tempData.add(Array.get(datum, i));
+                        }
+
+                    } else if (datum.getClass().isArray()) {
+                        for (int i = 0; i < ((Object[]) datum).length; i++) { //Collection copy messes up the data for some reason
+                            tempData.add(((Object[]) datum)[i]);
+                        }
+
+                    } else {
+                        throw new ZipFormatException(datum, count);
                     }
-                    
-                } else if (datum instanceof char[]) {
-                    for (int i = 0; i < ((char[]) datum).length; i++) {
-                        tempData.add(((char[]) datum)[i]);
-                    }
-                    
-                } else if (datum instanceof float[]) {
-                    for (int i = 0; i < ((float[]) datum).length; i++) {
-                        tempData.add(((float[]) datum)[i]);
-                    }
-                    
-                } else if (datum instanceof double[]) {
-                   for (int i = 0; i < ((double[]) datum).length; i++) {
-                        tempData.add(((double[]) datum)[i]);
-                    }
-                    
-                } else if(datum instanceof boolean[]) {
-                    for(int i=0; i<((boolean[])datum).length; i++) {
-                        tempData.add(((boolean[])datum)[i]);
-                    }
-                    
-                } else if (datum.getClass().isArray()) {
-                    for (int i = 0; i < ((Object[]) datum).length; i++) { //Collection copy messes up the data for some reason
-                        tempData.add(((Object[]) datum)[i]);
-                    }
-                    
-                } else {
-                    throw new ZipFormatException(datum, count);
+
+                    sources.add(tempData);
                 }
-                
-                sources.add(tempData);
             }
 
             catch (ZipFormatException e)
