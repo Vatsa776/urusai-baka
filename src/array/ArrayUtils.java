@@ -54,10 +54,9 @@ public abstract class ArrayUtils {
      * can be sanitized by specifying the first parameter as a boolean true.
      * <p>
      * Remember to sanitize the resultant list, or use {@link #zip(boolean, Object...)} with
-     * true as the first value to sanitize the output.
+     * true as the first value to sanitize the output. This can also be used to unzip a zipped object.
      * <p>
-     * SUPPORTS: int[],char[],float[],boolean[],double[],String[],ArrayLists, and <?>[].
-     * <p>
+     * <b>SUPPORTS</b>: int[],char[],float[],boolean[],double[],String[],ArrayLists, and <?>[].
      * @param data A variable number of arrays/ArrayLists of any type. First value may be boolean.
      * @return An ArrayList of the zipped ArrayLists.
      */
@@ -73,11 +72,8 @@ public abstract class ArrayUtils {
 
     /**
      * Internal implementation of the zip method.
-     * <p>
-     * The result is a sanitized list without any null fillers.
-     * <p>
-     * SUPPORTS: int[],char[],float[],boolean[],double[],String[],ArrayLists, and <?>[].
-     * <p>
+     * The result is a sanitized list without any null fillers, if sanitize is true.
+     * @param sanitize Whether to return null fillers or not.
      * @param data A variable number of arrays/ArrayLists of any type.
      * @return An ArrayList of the zipped ArrayLists.
      */
@@ -165,7 +161,16 @@ public abstract class ArrayUtils {
                     if( i < nullRemoval)
                         toAdd = source.get(i);
 
-                    temp.add(toAdd);
+                    if(sanitize) {
+                        if (toAdd != null) {
+                            temp.add(toAdd);
+                        }
+                    }
+
+                    else{
+                        temp.add(toAdd);
+                    }
+
                 }
 
                 catch(Exception e)
