@@ -2,11 +2,9 @@ package array;
 
 import exceptions.ArrayUtilsExceptions.ZipFormatException;
 
-import java.util.ArrayList;
+import java.awt.image.AreaAveragingScaleFilter;
+import java.util.*;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by vatsa on 06/01/16.
@@ -15,36 +13,30 @@ public abstract class ArrayUtils {
 
     /**
      * Creates an ArrayList with all falsey values removed. The values false, null, 0, "", and NaN are falsey.
+     *
      * @param arrayObject The array to compact.
      * @return An ArrayList of the compacted elements.
      */
-    public static ArrayList<Object> compact(Object arrayObject)
-    {
+    public static ArrayList<Object> compact(Object arrayObject) {
         List<Object> result;
 
-        if(arrayObject instanceof List)
-        {
-            result = ((ArrayList<Object>)arrayObject);
-        }
-
-        else
-        {
+        if (arrayObject instanceof List) {
+            result = ((List<Object>) arrayObject);
+        } else {
             result = toObjectArrayList(arrayObject);
         }
 
         Iterator<Object> it = result.iterator();
 
-        while(it.hasNext())
-        {
+        while (it.hasNext()) {
             Object element = it.next();
 
-            if(isFalsey(element))
-            {
+            if (isFalsey(element)) {
                 it.remove();
             }
         }
 
-        return (ArrayList<Object>)result;
+        return (ArrayList<Object>) result;
     }
 
     /**
@@ -57,28 +49,27 @@ public abstract class ArrayUtils {
      * true as the first value to sanitize the output. This can also be used to unzip a zipped object.
      * <p>
      * <b>SUPPORTS</b>: int[],char[],float[],boolean[],double[],String[],ArrayLists, and <?>[].
+     *
      * @param data A variable number of arrays/ArrayLists of any type. First value may be boolean.
      * @return An ArrayList of the zipped ArrayLists.
      */
-    public static List<ArrayList<Object>> zip(Object... data)
-    {
-        if(data[0] instanceof Boolean)
-        {
-            return zip((Boolean)data[0],data);
+    public static List<ArrayList<Object>> zip(Object... data) {
+        if (data[0] instanceof Boolean) {
+            return zip((Boolean) data[0], data);
         }
 
-        return zip(false,data);
+        return zip(false, data);
     }
 
     /**
      * Internal implementation of the zip method.
      * The result is a sanitized list without any null fillers, if sanitize is true.
+     *
      * @param sanitize Whether to return null fillers or not.
-     * @param data A variable number of arrays/ArrayLists of any type.
+     * @param data     A variable number of arrays/ArrayLists of any type.
      * @return An ArrayList of the zipped ArrayLists.
      */
-    private static List<ArrayList<Object>> zip(boolean sanitize, Object... data)
-    {
+    private static List<ArrayList<Object>> zip(boolean sanitize, Object... data) {
         List<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
         List<ArrayList<Object>> sources = new ArrayList<ArrayList<Object>>();
 
@@ -86,12 +77,9 @@ public abstract class ArrayUtils {
         int count = 0;
 
 
-        for(Object datum : data)
-        {
-            if(count == 0)
-            {
-                if(datum instanceof Boolean)
-                {
+        for (Object datum : data) {
+            if (count == 0) {
+                if (datum instanceof Boolean) {
                     continue;
                 }
             }
@@ -126,55 +114,41 @@ public abstract class ArrayUtils {
 
                     sources.add(tempData);
                 }
-            }
-
-            catch (ZipFormatException e)
-            {
+            } catch (ZipFormatException e) {
                 System.out.println(e);
             }
         }
 
-        for(ArrayList<Object> source : sources)
-        {
-            if(source.size() > maxSize)
-            {
+        for (ArrayList<Object> source : sources) {
+            if (source.size() > maxSize) {
                 maxSize = source.size();
             }
         }
 
-        for(int i=0; i<maxSize; i++)
-        {
+        for (int i = 0; i < maxSize; i++) {
             result.add(new ArrayList<Object>());
         }
 
-        for(ArrayList<Object> source : sources)
-        {
+        for (ArrayList<Object> source : sources) {
             int nullRemoval = (sanitize ? maxSize : source.size());
 
-            for(int i=0; i < maxSize; i++)
-            {
-                try
-                {
+            for (int i = 0; i < maxSize; i++) {
+                try {
                     ArrayList<Object> temp = result.get(i);
                     Object toAdd = null;
 
-                    if( i < nullRemoval)
+                    if (i < nullRemoval)
                         toAdd = source.get(i);
 
-                    if(sanitize) {
+                    if (sanitize) {
                         if (toAdd != null) {
                             temp.add(toAdd);
                         }
-                    }
-
-                    else{
+                    } else {
                         temp.add(toAdd);
                     }
 
-                }
-
-                catch(Exception e)
-                {
+                } catch (Exception e) {
 
                 }
             }
@@ -185,98 +159,82 @@ public abstract class ArrayUtils {
 
     /**
      * Internal method to convert primitive/non primitive arrays to Object arrays.
+     *
      * @param arrayObject The array to be converted to Object[].
      * @return Object[] of the converted elements.
      */
-    private static Object[] toObjectArray(Object arrayObject)
-    {
+    private static Object[] toObjectArray(Object arrayObject) {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
-        if (arrayClass.isPrimitive())
-        {
+        if (arrayClass.isPrimitive()) {
             List result = new ArrayList();
             int length = Array.getLength(arrayObject);
 
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 result.add(Array.get(arrayObject, i));
             }
             return result.toArray();
-        }
-
-        else
-        {
+        } else {
             return (Object[]) arrayObject;
         }
     }
 
     /**
      * Internal method to convert primitive/non primitive arrays to Object ArrayList.
+     *
      * @param arrayObject The array to be converted to ArrayList.
      * @return ArrayList of the converted elements.
      */
-    private static List<Object> toObjectArrayList(Object arrayObject)
-    {
+    private static List<Object> toObjectArrayList(Object arrayObject) {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
-        if (arrayClass.isPrimitive())
-        {
+        if (arrayClass.isPrimitive()) {
             List result = new ArrayList();
             int length = Array.getLength(arrayObject);
 
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 result.add(Array.get(arrayObject, i));
             }
             return result;
-        }
-
-        else
-        {
+        } else {
             return Arrays.asList((Object[]) arrayObject);
         }
     }
 
     /**
      * Checks for the values false, null, 0, "", and NaN.
+     *
      * @param element The element to be checked for falseness.
      * @return true if element was falsey.
      */
-    private static boolean isFalsey(Object element)
-    {
-        if(element == null)
-        {
+    private static boolean isFalsey(Object element) {
+        if (element == null) {
             return true;
         }
 
-        if(element.equals(false))
-        {
+        if (element.equals(false)) {
             return true;
         }
 
-        if(element instanceof String)
-        {
-            if(((String)element).isEmpty())
-            {
+        if (element instanceof String) {
+            if (((String) element).isEmpty()) {
                 return true;
             }
         }
 
-        if(element instanceof Integer)
-        {
-            if((Integer)element == 0)
-            {
+        if (element instanceof Integer) {
+            if ((Integer) element == 0) {
                 return true;
             }
         }
 
-        if(element instanceof Double || element instanceof Float) {
+        if (element instanceof Double || element instanceof Float) {
 
             try {
                 if (((Double) element).isNaN()) {
                     return true;
                 }
-            } catch (ClassCastException e){
+            } catch (ClassCastException e) {
                 if (((Float) element).isNaN()) {
                     return true;
                 }
@@ -284,5 +242,30 @@ public abstract class ArrayUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Method to break up an array/arraylist into smaller chunks, as specified by chunksize.
+     * @param input An array/arraylist to be chunked.
+     * @param chunkSize size to chunk it in.
+     * @return A list of arraylists of the chunked array.
+     */
+    public static List<ArrayList<Object>> chunk(Object input, int chunkSize) {
+        List<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
+        int index = -1;
+
+        List<Object> data = toObjectArrayList(input);
+
+        for (int i = 0; i < data.size(); i++) {
+
+            if (i % chunkSize == 0) {
+                result.add(new ArrayList<Object>());
+                index++;
+            }
+
+            result.get(index).add(data.get(i));
+        }
+
+        return result;
     }
 }
