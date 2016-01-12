@@ -62,7 +62,7 @@ public abstract class ArrayUtils {
     }
 
     /**
-     * Internal implementation of the zip method.
+     * Internal implementation of the {@link #zip(Object...)} method.
      * The result is a sanitized list without any null fillers, if sanitize is true.
      *
      * @param sanitize Whether to return null fillers or not.
@@ -246,7 +246,8 @@ public abstract class ArrayUtils {
 
     /**
      * Method to break up an array/arraylist into smaller chunks, as specified by chunksize.
-     * @param input An array/arraylist to be chunked.
+     *
+     * @param input     An array/arraylist to be chunked.
      * @param chunkSize size to chunk it in.
      * @return A list of arraylists of the chunked array.
      */
@@ -267,5 +268,60 @@ public abstract class ArrayUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Internal implementation for both {@link #drop(Object, int)} and {@link #dropRight(Object, int)}.
+     * @param input the array to drop
+     * @param dropSize how many elements to drop
+     * @param direction from which end to drop (left = true)
+     * @return An arraylist of the remaining elements
+     */
+    private static List<Object> drop(Object input, int dropSize, boolean direction) {
+        List<Object> result = new ArrayList<Object>();
+        int index = -1;
+
+        List<Object> data = toObjectArrayList(input);
+
+        Iterator<Object> it = data.iterator();
+
+        while (it.hasNext()) {
+            it.next();
+
+            index++;
+            if (direction) {
+                if (index < dropSize) {
+                    it.remove();
+                }
+            } else {
+                if (index > data.size() - dropSize) {
+                    it.remove();
+                }
+            }
+        }
+
+        return data;
+    }
+
+    /**
+     * Drops the first n elements of an Array.
+     *
+     * @param input    the array to drop
+     * @param dropSize number of elements to drop from the left.
+     * @return An arraylist of the edited array.
+     */
+    public static List<Object> drop(Object input, int dropSize) {
+        return drop(input, dropSize, true);
+    }
+
+    /**
+     * Drops the last n elements of an Array.
+     *
+     * @param input    the array to drop
+     * @param dropSize number of elements to drop from the right.
+     * @return An arraylist of the edited array.
+     */
+    public static List<Object> dropRight(Object input, int dropSize) {
+        return drop(input, dropSize, false);
     }
 }
