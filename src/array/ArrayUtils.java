@@ -1,5 +1,7 @@
 package array;
 
+import exceptions.ArrayUtilsExceptions.JoinArgumentException;
+import exceptions.ArrayUtilsExceptions.ObjectListCastException;
 import exceptions.ArrayUtilsExceptions.ZipFormatException;
 
 import java.awt.image.AreaAveragingScaleFilter;
@@ -16,8 +18,9 @@ public abstract class ArrayUtils {
      *
      * @param arrayObject The array to compact.
      * @return An ArrayList of the compacted elements.
+     * @throws ObjectListCastException
      */
-    public static ArrayList<Object> compact(Object arrayObject) {
+    public static ArrayList<Object> compact(Object arrayObject) throws ObjectListCastException {
         List<Object> result;
 
         if (arrayObject instanceof List) {
@@ -52,8 +55,9 @@ public abstract class ArrayUtils {
      *
      * @param data A variable number of arrays/ArrayLists of any type. First value may be boolean.
      * @return An ArrayList of the zipped ArrayLists.
+     * @throws ZipFormatException
      */
-    public static List<ArrayList<Object>> zip(Object... data) {
+    public static List<ArrayList<Object>> zip(Object... data) throws ZipFormatException {
         if (data[0] instanceof Boolean) {
             return zip((Boolean) data[0], data);
         }
@@ -68,8 +72,9 @@ public abstract class ArrayUtils {
      * @param sanitize Whether to return null fillers or not.
      * @param data     A variable number of arrays/ArrayLists of any type.
      * @return An ArrayList of the zipped ArrayLists.
+     * @throws ZipFormatException
      */
-    private static List<ArrayList<Object>> zip(boolean sanitize, Object... data) {
+    private static List<ArrayList<Object>> zip(boolean sanitize, Object... data) throws ZipFormatException {
         List<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
         List<ArrayList<Object>> sources = new ArrayList<ArrayList<Object>>();
 
@@ -86,36 +91,31 @@ public abstract class ArrayUtils {
 
             count++;
 
-            try {
+            ArrayList<Object> tempData = new ArrayList<Object>();
 
-                ArrayList<Object> tempData = new ArrayList<Object>();
+            if (datum instanceof List) {
+                sources.add((ArrayList<Object>) datum);
+            }
 
-                if (datum instanceof List) {
-                    sources.add((ArrayList<Object>) datum);
-                }
+            //Cleaned this up. I've forgotten my java lol
 
-                //Cleaned this up. I've forgotten my java lol
+            else {
 
-                else {
-
-                    if (datum.getClass().getComponentType().isPrimitive()) {
-                        for (int i = 0; i < Array.getLength(datum); i++) {
-                            tempData.add(Array.get(datum, i));
-                        }
-
-                    } else if (datum.getClass().isArray()) {
-                        for (int i = 0; i < ((Object[]) datum).length; i++) { //Collection copy messes up the data for some reason
-                            tempData.add(((Object[]) datum)[i]);
-                        }
-
-                    } else {
-                        throw new ZipFormatException(datum, count);
+                if (datum.getClass().getComponentType().isPrimitive()) {
+                    for (int i = 0; i < Array.getLength(datum); i++) {
+                        tempData.add(Array.get(datum, i));
                     }
 
-                    sources.add(tempData);
+                } else if (datum.getClass().isArray()) {
+                    for (int i = 0; i < ((Object[]) datum).length; i++) { //Collection copy messes up the data for some reason
+                        tempData.add(((Object[]) datum)[i]);
+                    }
+
+                } else {
+                    throw new ZipFormatException(datum, count);
                 }
-            } catch (ZipFormatException e) {
-                System.out.println(e);
+
+                sources.add(tempData);
             }
         }
 
@@ -133,23 +133,19 @@ public abstract class ArrayUtils {
             int nullRemoval = (sanitize ? maxSize : source.size());
 
             for (int i = 0; i < maxSize; i++) {
-                try {
-                    ArrayList<Object> temp = result.get(i);
-                    Object toAdd = null;
 
-                    if (i < nullRemoval)
-                        toAdd = source.get(i);
+                ArrayList<Object> temp = result.get(i);
+                Object toAdd = null;
 
-                    if (sanitize) {
-                        if (toAdd != null) {
-                            temp.add(toAdd);
-                        }
-                    } else {
+                if (i < nullRemoval)
+                    toAdd = source.get(i);
+
+                if (sanitize) {
+                    if (toAdd != null) {
                         temp.add(toAdd);
                     }
-
-                } catch (Exception e) {
-
+                } else {
+                    temp.add(toAdd);
                 }
             }
         }
@@ -162,8 +158,9 @@ public abstract class ArrayUtils {
      *
      * @param arrayObject The array to be converted to Object[].
      * @return Object[] of the converted elements.
+     * @throws ObjectListCastException
      */
-    private static Object[] toObjectArray(Object arrayObject) {
+    private static Object[] toObjectArray(Object arrayObject) throws ObjectListCastException {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
         if (arrayClass.isPrimitive()) {
@@ -184,20 +181,29 @@ public abstract class ArrayUtils {
      *
      * @param arrayObject The array to be converted to ArrayList.
      * @return ArrayList of the converted elements.
+     * @throws ObjectListCastException
      */
-    private static List<Object> toObjectArrayList(Object arrayObject) {
+    private static List<Object> toObjectArrayList(Object arrayObject) throws ObjectListCastException {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
-        if (arrayClass.isPrimitive()) {
-            List result = new ArrayList();
-            int length = Array.getLength(arrayObject);
+        if(arrayClass != null)
+        {
+            if (arrayClass.isPrimitive()) {
+                List result = new ArrayList();
+                int length = Array.getLength(arrayObject);
 
-            for (int i = 0; i < length; i++) {
-                result.add(Array.get(arrayObject, i));
+                for (int i = 0; i < length; i++) {
+                    result.add(Array.get(arrayObject, i));
+                }
+                return result;
             }
-            return result;
-        } else {
-            return Arrays.asList((Object[]) arrayObject);
+            else{
+                throw new ObjectListCastException(arrayObject);
+            }
+        }
+
+        else {
+            throw new ObjectListCastException(arrayClass);
         }
     }
 
@@ -250,8 +256,9 @@ public abstract class ArrayUtils {
      * @param input     An array/arraylist to be chunked.
      * @param chunkSize size to chunk it in.
      * @return A list of arraylists of the chunked array.
+     * @throws ObjectListCastException
      */
-    public static List<ArrayList<Object>> chunk(Object input, int chunkSize) {
+    public static List<ArrayList<Object>> chunk(Object input, int chunkSize) throws ObjectListCastException {
         List<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
         int index = -1;
 
@@ -272,12 +279,14 @@ public abstract class ArrayUtils {
 
     /**
      * Internal implementation for both {@link #drop(Object, int)} and {@link #dropRight(Object, int)}.
-     * @param input the array to drop
-     * @param dropSize how many elements to drop
+     *
+     * @param input     the array to drop
+     * @param dropSize  how many elements to drop
      * @param direction from which end to drop (left = true)
      * @return An arraylist of the remaining elements
+     * @throws ObjectListCastException
      */
-    private static List<Object> drop(Object input, int dropSize, boolean direction) {
+    private static List<Object> drop(Object input, int dropSize, boolean direction) throws ObjectListCastException {
         List<Object> result = new ArrayList<Object>();
         int index = -1;
 
@@ -309,8 +318,9 @@ public abstract class ArrayUtils {
      * @param input    the array to drop
      * @param dropSize number of elements to drop from the left.
      * @return An arraylist of the edited array.
+     * @throws ObjectListCastException
      */
-    public static List<Object> drop(Object input, int dropSize) {
+    public static List<Object> drop(Object input, int dropSize) throws ObjectListCastException{
         return drop(input, dropSize, true);
     }
 
@@ -320,8 +330,64 @@ public abstract class ArrayUtils {
      * @param input    the array to drop
      * @param dropSize number of elements to drop from the right.
      * @return An arraylist of the edited array.
+     * @throws ObjectListCastException
      */
-    public static List<Object> dropRight(Object input, int dropSize) {
+    public static List<Object> dropRight(Object input, int dropSize) throws ObjectListCastException {
         return drop(input, dropSize, false);
+    }
+
+    /**
+     * Joins all the objects specified by arrayObject into a string, separated by the separator argument.
+     * @param arrayObject The array/list of objects to join
+     * @param separator The intended separator
+     * @return separated string of objects
+     * @throws JoinArgumentException
+     */
+    public static String join(Object arrayObject, String separator) throws JoinArgumentException {
+
+        Class arrayClass = arrayObject.getClass().getComponentType();
+        StringBuilder result = new StringBuilder();
+
+        if(arrayClass != null) {
+            if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
+                int i = 0;
+
+                for (; i < Array.getLength(arrayObject) - 1; i++) {
+
+                    result.append(Array.get(arrayObject, i).toString());
+                    result.append(separator);
+                }
+
+                result.append(Array.get(arrayObject, i));
+            }
+        }
+
+        else if(arrayObject instanceof List) {
+
+            Iterator it = ((List)arrayObject).iterator();
+            Object obj = null;
+
+            while(it.hasNext())
+            {
+                obj = (Object)it.next();
+
+                if(!it.hasNext())
+                {
+                    break;
+                }
+
+                result.append(obj.toString());
+                result.append(separator);
+            }
+
+            result.append(obj.toString());
+        }
+
+        else {
+
+            throw new JoinArgumentException(arrayObject);
+        }
+
+        return result.toString();
     }
 }
