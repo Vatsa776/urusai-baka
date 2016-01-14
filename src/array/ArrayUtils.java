@@ -1,5 +1,6 @@
 package array;
 
+import exceptions.ArrayUtilsExceptions.FilterArgumentException;
 import exceptions.ArrayUtilsExceptions.JoinArgumentException;
 import exceptions.ArrayUtilsExceptions.ObjectListCastException;
 import exceptions.ArrayUtilsExceptions.ZipFormatException;
@@ -186,8 +187,7 @@ public abstract class ArrayUtils {
     private static List<Object> toObjectArrayList(Object arrayObject) throws ObjectListCastException {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
-        if(arrayClass != null)
-        {
+        if (arrayClass != null) {
             if (arrayClass.isPrimitive()) {
                 List result = new ArrayList();
                 int length = Array.getLength(arrayObject);
@@ -196,13 +196,10 @@ public abstract class ArrayUtils {
                     result.add(Array.get(arrayObject, i));
                 }
                 return result;
-            }
-            else{
+            } else {
                 throw new ObjectListCastException(arrayObject);
             }
-        }
-
-        else {
+        } else {
             throw new ObjectListCastException(arrayClass);
         }
     }
@@ -216,26 +213,17 @@ public abstract class ArrayUtils {
     private static boolean isFalsey(Object element) {
         if (element == null) {
             return true;
-        }
-
-        if (element.equals(false)) {
+        } else if (element.equals(false)) {
             return true;
-        }
-
-        if (element instanceof String) {
+        } else if (element instanceof String) {
             if (((String) element).isEmpty()) {
                 return true;
             }
-        }
-
-        if (element instanceof Integer) {
+        } else if (element instanceof Integer) {
             if ((Integer) element == 0) {
                 return true;
             }
-        }
-
-        if (element instanceof Double || element instanceof Float) {
-
+        } else if (element instanceof Double || element instanceof Float) {
             try {
                 if (((Double) element).isNaN()) {
                     return true;
@@ -320,7 +308,7 @@ public abstract class ArrayUtils {
      * @return An arraylist of the edited array.
      * @throws ObjectListCastException
      */
-    public static List<Object> drop(Object input, int dropSize) throws ObjectListCastException{
+    public static List<Object> drop(Object input, int dropSize) throws ObjectListCastException {
         return drop(input, dropSize, true);
     }
 
@@ -338,8 +326,9 @@ public abstract class ArrayUtils {
 
     /**
      * Joins all the objects specified by arrayObject into a string, separated by the separator argument.
+     *
      * @param arrayObject The array/list of objects to join
-     * @param separator The intended separator
+     * @param separator   The intended separator
      * @return separated string of objects
      * @throws JoinArgumentException
      */
@@ -348,7 +337,7 @@ public abstract class ArrayUtils {
         Class arrayClass = arrayObject.getClass().getComponentType();
         StringBuilder result = new StringBuilder();
 
-        if(arrayClass != null) {
+        if (arrayClass != null) {
             if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
                 int i = 0;
 
@@ -360,19 +349,15 @@ public abstract class ArrayUtils {
 
                 result.append(Array.get(arrayObject, i));
             }
-        }
+        } else if (arrayObject instanceof List) {
 
-        else if(arrayObject instanceof List) {
-
-            Iterator it = ((List)arrayObject).iterator();
+            Iterator it = ((List) arrayObject).iterator();
             Object obj = null;
 
-            while(it.hasNext())
-            {
-                obj = (Object)it.next();
+            while (it.hasNext()) {
+                obj = (Object) it.next();
 
-                if(!it.hasNext())
-                {
+                if (!it.hasNext()) {
                     break;
                 }
 
@@ -381,13 +366,50 @@ public abstract class ArrayUtils {
             }
 
             result.append(obj.toString());
-        }
-
-        else {
-
+        } else {
             throw new JoinArgumentException(arrayObject);
         }
 
         return result.toString();
     }
+
+    /**
+     * Filters the array/list based on the lambda passed to it. This method requires a <b>boolean</b> lambda.
+     *
+     * @param arrayObject
+     * @param criteria
+     * @return
+     * @throws ObjectListCastException
+     * @throws FilterArgumentException
+     */
+    public static List filter(Object arrayObject, Function criteria) throws ObjectListCastException, FilterArgumentException {
+
+        Class arrayClass = arrayObject.getClass().getComponentType();
+        List result = null;
+
+        if (arrayClass != null) {
+            if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
+                result = toObjectArrayList(arrayObject);
+            }
+        } else if (arrayObject instanceof List) {
+            result = (List) arrayObject;
+        } else {
+            throw new FilterArgumentException();
+        }
+
+        Iterator it = result.iterator();
+
+        while (it.hasNext()) {
+
+            Object obj = it.next();
+
+            if ((boolean) criteria.body(obj)) {
+                it.remove();
+            }
+        }
+
+        return result;
+    }
 }
+
+
