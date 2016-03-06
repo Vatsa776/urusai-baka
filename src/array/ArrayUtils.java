@@ -1,7 +1,9 @@
 package array;
 
-import exceptions.ArrayUtilsExceptions.*;
-
+import exceptions.ArrayUtilsExceptions.ArgumentException;
+import exceptions.ArrayUtilsExceptions.ArgumentExceptionTypes;
+import exceptions.ArrayUtilsExceptions.ObjectListCastException;
+import exceptions.ArrayUtilsExceptions.ZipFormatException;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -324,9 +326,9 @@ public abstract class ArrayUtils {
      * @param arrayObject The array/list of objects to join
      * @param separator   The intended separator
      * @return separated string of objects
-     * @throws JoinArgumentException
+     * @throws ArgumentException
      */
-    public static String join(Object arrayObject, String separator) throws JoinArgumentException {
+    public static String join(Object arrayObject, String separator) throws ArgumentException {
 
         Class arrayClass = arrayObject.getClass().getComponentType();
         StringBuilder result = new StringBuilder();
@@ -361,7 +363,7 @@ public abstract class ArrayUtils {
 
             result.append(obj.toString());
         } else {
-            throw new JoinArgumentException(arrayObject);
+            throw new ArgumentException(arrayObject,ArgumentExceptionTypes.JOIN);
         }
 
         return result.toString();
@@ -374,9 +376,9 @@ public abstract class ArrayUtils {
      * @param criteria
      * @return
      * @throws ObjectListCastException
-     * @throws FilterArgumentException
+     * @throws ArgumentException
      */
-    public static List filter(Object arrayObject, Function criteria) throws ObjectListCastException, FilterArgumentException {
+    public static List filter(Object arrayObject, Function criteria) throws ObjectListCastException, ArgumentException {
 
         Class arrayClass = arrayObject.getClass().getComponentType();
         List result = null;
@@ -388,7 +390,7 @@ public abstract class ArrayUtils {
         } else if (arrayObject instanceof List) {
             result = (List) arrayObject;
         } else {
-            throw new FilterArgumentException(arrayObject);
+            throw new ArgumentException(arrayObject,ArgumentExceptionTypes.FILTER);
         }
 
         Iterator it = result.iterator();
@@ -414,9 +416,9 @@ public abstract class ArrayUtils {
      * @param direction   Whether to slice from left or right
      * @return New ArrayList with <b>n</b> number of elements from the left/right.
      * @throws ObjectListCastException
-     * @throws TakeArgumentException
+     * @throws ArgumentException
      */
-    private static List take(Object arrayObject, int n, boolean direction) throws ObjectListCastException, TakeArgumentException {
+    private static List take(Object arrayObject, int n, boolean direction) throws ObjectListCastException, ArgumentException {
 
         Class arrayClass = arrayObject.getClass().getComponentType();
         List result = null;
@@ -429,7 +431,7 @@ public abstract class ArrayUtils {
         } else if (arrayObject instanceof List) {
             result = (List) arrayObject;
         } else {
-            throw new TakeArgumentException(arrayObject);
+            throw new ArgumentException(arrayObject,ArgumentExceptionTypes.TAKE);
         }
 
         Iterator it = result.iterator();
@@ -463,9 +465,9 @@ public abstract class ArrayUtils {
      * @param n           Number of elements to slice from the left
      * @return New ArrayList with <b>n</b> number of elements from the left.
      * @throws ObjectListCastException
-     * @throws TakeArgumentException
+     * @throws ArgumentException
      */
-    public static List take(Object arrayObject, int n) throws ObjectListCastException, TakeArgumentException {
+    public static List take(Object arrayObject, int n) throws ObjectListCastException, ArgumentException {
 
         return take(arrayObject, n, true);
     }
@@ -477,9 +479,9 @@ public abstract class ArrayUtils {
      * @param n           Number of elements to slice from the right
      * @return New ArrayList with <b>n</b> number of elements from the left.
      * @throws ObjectListCastException
-     * @throws TakeArgumentException
+     * @throws ArgumentException
      */
-    public static List takeRight(Object arrayObject, int n) throws ObjectListCastException, TakeArgumentException {
+    public static List takeRight(Object arrayObject, int n) throws ObjectListCastException, ArgumentException {
 
         return take(arrayObject, n, false);
     }
@@ -490,10 +492,10 @@ public abstract class ArrayUtils {
      * @param arrayObject The array/list object to reverse
      * @return An ArrayList with the reversed objects
      * @throws ObjectListCastException
-     * @throws ReverseArgumentException
+     * @throws ArgumentException
      */
 
-    public static List reverse(Object arrayObject) throws ObjectListCastException, ReverseArgumentException {
+    public static List reverse(Object arrayObject) throws ObjectListCastException, ArgumentException {
 
         Class arrayClass = arrayObject.getClass().getComponentType();
         List result = null;
@@ -505,7 +507,7 @@ public abstract class ArrayUtils {
         } else if (arrayObject instanceof List) {
             result = (List) arrayObject;
         } else {
-            throw new ReverseArgumentException();
+            throw new ArgumentException(arrayObject,ArgumentExceptionTypes.REVERSE);
         }
 
         for (int i = 0, j = result.size() - 1; i < j; i++) {
@@ -521,9 +523,9 @@ public abstract class ArrayUtils {
      * @param arrayObjects any number of arrays/lists to unionize.
      * @return a list of all elements with no duplicates.
      * @throws ObjectListCastException
-     * @throws UnionArgumentException
+     * @throws ArgumentException
      */
-    public static List union(Object... arrayObjects) throws ObjectListCastException, UnionArgumentException {
+    public static List union(Object... arrayObjects) throws ObjectListCastException, ArgumentException {
 
         Set elements = new HashSet();
 
@@ -539,7 +541,7 @@ public abstract class ArrayUtils {
             } else if (arrayObject instanceof List) {
                 result = (List) arrayObject;
             } else {
-                throw new UnionArgumentException();
+                throw new ArgumentException(arrayObject,ArgumentExceptionTypes.UNION);
             }
 
             Iterator it = result.iterator();
