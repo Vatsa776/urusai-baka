@@ -2,9 +2,10 @@ package array;
 
 import exceptions.ArrayUtilsExceptions.*;
 
-import java.awt.image.AreaAveragingScaleFilter;
-import java.util.*;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by vatsa on 06/01/16.
@@ -185,7 +186,7 @@ public abstract class ArrayUtils {
         Class arrayClass = arrayObject.getClass().getComponentType();
 
         if (arrayClass != null) {
-            if (arrayClass.isPrimitive()) {
+
                 List result = new ArrayList();
                 int length = Array.getLength(arrayObject);
 
@@ -193,9 +194,6 @@ public abstract class ArrayUtils {
                     result.add(Array.get(arrayObject, i));
                 }
                 return result;
-            } else {
-                throw new ObjectListCastException(arrayObject);
-            }
         } else {
             throw new ObjectListCastException(arrayClass);
         }
@@ -203,6 +201,7 @@ public abstract class ArrayUtils {
 
     /**
      * Checks for the values false, null, 0, "", and NaN.
+     * INTERNAL ONLY.
      *
      * @param element The element to be checked for falseness.
      * @return true if element was falsey.
@@ -391,7 +390,7 @@ public abstract class ArrayUtils {
         } else if (arrayObject instanceof List) {
             result = (List) arrayObject;
         } else {
-            throw new FilterArgumentException();
+            throw new FilterArgumentException(arrayObject);
         }
 
         Iterator it = result.iterator();
@@ -409,11 +408,12 @@ public abstract class ArrayUtils {
     }
 
     /**
-     * Internal implementation of the take/takeRight methods. Slices the arrayObject and returns n elements
+     * Internal implementation of the {@link #take(Object, int)}/{@link #takeRight(Object, int)} methods. Slices the arrayObject and returns n elements
      * from the left/right.
+     *
      * @param arrayObject The array/list to slice
-     * @param n Number of elements to slice from the left or right
-     * @param direction Whether to slice from left or right
+     * @param n           Number of elements to slice from the left or right
+     * @param direction   Whether to slice from left or right
      * @return New ArrayList with <b>n</b> number of elements from the left/right.
      * @throws ObjectListCastException
      * @throws TakeArgumentException
@@ -429,9 +429,9 @@ public abstract class ArrayUtils {
                 result = toObjectArrayList(arrayObject);
             }
         } else if (arrayObject instanceof List) {
-            result = (List)arrayObject;
+            result = (List) arrayObject;
         } else {
-            throw new TakeArgumentException();
+            throw new TakeArgumentException(arrayObject);
         }
 
         Iterator it = result.iterator();
@@ -460,8 +460,9 @@ public abstract class ArrayUtils {
 
     /**
      * Returns a slice of the array with n elements from the left.
+     *
      * @param arrayObject The array/list to slice
-     * @param n Number of elements to slice from the left
+     * @param n           Number of elements to slice from the left
      * @return New ArrayList with <b>n</b> number of elements from the left.
      * @throws ObjectListCastException
      * @throws TakeArgumentException
@@ -473,8 +474,9 @@ public abstract class ArrayUtils {
 
     /**
      * Returns a slice of the array with n elements from the right.
+     *
      * @param arrayObject The array/list to slice
-     * @param n Number of elements to slice from the right
+     * @param n           Number of elements to slice from the right
      * @return New ArrayList with <b>n</b> number of elements from the left.
      * @throws ObjectListCastException
      * @throws TakeArgumentException
@@ -482,6 +484,37 @@ public abstract class ArrayUtils {
     public static List takeRight(Object arrayObject, int n) throws ObjectListCastException, TakeArgumentException {
 
         return take(arrayObject, n, false);
+    }
+
+    /**
+     * Reverses an array/list in place.
+     *
+     * @param arrayObject The array/list object to reverse
+     * @return An ArrayList with the reversed objects
+     * @throws ObjectListCastException
+     * @throws ReverseArgumentException
+     */
+
+    public static List reverse(Object arrayObject) throws ObjectListCastException, ReverseArgumentException {
+
+        Class arrayClass = arrayObject.getClass().getComponentType();
+        List result = null;
+
+        if (arrayClass != null) {
+            if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
+                result = toObjectArrayList(arrayObject);
+            }
+        } else if (arrayObject instanceof List) {
+            result = (List) arrayObject;
+        } else {
+            throw new ReverseArgumentException();
+        }
+
+        for (int i = 0, j = result.size() - 1; i < j; i++) {
+            result.add(i, result.remove(j));
+        }
+
+        return result;
     }
 }
 

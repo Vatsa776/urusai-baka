@@ -14,13 +14,10 @@ public interface Function {
      * @param data Whatever data the function takes.
      * @return Whatever object the function returns.
      */
-    Object body(Object data);
+    Object body(Object... data);
 
     /**
      * TODO:
      * Find a way to accept variable multiple objects without typecasting.
      */
-
-
-
 }
