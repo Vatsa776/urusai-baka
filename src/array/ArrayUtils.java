@@ -1,9 +1,6 @@
 package array;
 
-import exceptions.ArrayUtilsExceptions.FilterArgumentException;
-import exceptions.ArrayUtilsExceptions.JoinArgumentException;
-import exceptions.ArrayUtilsExceptions.ObjectListCastException;
-import exceptions.ArrayUtilsExceptions.ZipFormatException;
+import exceptions.ArrayUtilsExceptions.*;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.util.*;
@@ -409,6 +406,82 @@ public abstract class ArrayUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Internal implementation of the take/takeRight methods. Slices the arrayObject and returns n elements
+     * from the left/right.
+     * @param arrayObject The array/list to slice
+     * @param n Number of elements to slice from the left or right
+     * @param direction Whether to slice from left or right
+     * @return New ArrayList with <b>n</b> number of elements from the left/right.
+     * @throws ObjectListCastException
+     * @throws TakeArgumentException
+     */
+    private static List take(Object arrayObject, int n, boolean direction) throws ObjectListCastException, TakeArgumentException {
+
+        Class arrayClass = arrayObject.getClass().getComponentType();
+        List result = null;
+        int counter = 0;
+
+        if (arrayClass != null) {
+            if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
+                result = toObjectArrayList(arrayObject);
+            }
+        } else if (arrayObject instanceof List) {
+            result = (List)arrayObject;
+        } else {
+            throw new TakeArgumentException();
+        }
+
+        Iterator it = result.iterator();
+
+        if (direction) {
+            while (it.hasNext() && counter != n) {
+                counter++;
+                it.next();
+            }
+            while (it.hasNext()) {
+                it.next();
+                it.remove();
+            }
+        } else {
+
+            int length = result.size();
+            while (it.hasNext() && counter != (length - n)) {
+                counter++;
+                it.next();
+                it.remove();
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a slice of the array with n elements from the left.
+     * @param arrayObject The array/list to slice
+     * @param n Number of elements to slice from the left
+     * @return New ArrayList with <b>n</b> number of elements from the left.
+     * @throws ObjectListCastException
+     * @throws TakeArgumentException
+     */
+    public static List take(Object arrayObject, int n) throws ObjectListCastException, TakeArgumentException {
+
+        return take(arrayObject, n, true);
+    }
+
+    /**
+     * Returns a slice of the array with n elements from the right.
+     * @param arrayObject The array/list to slice
+     * @param n Number of elements to slice from the right
+     * @return New ArrayList with <b>n</b> number of elements from the left.
+     * @throws ObjectListCastException
+     * @throws TakeArgumentException
+     */
+    public static List takeRight(Object arrayObject, int n) throws ObjectListCastException, TakeArgumentException {
+
+        return take(arrayObject, n, false);
     }
 }
 
