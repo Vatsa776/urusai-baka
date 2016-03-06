@@ -3,9 +3,7 @@ package array;
 import exceptions.ArrayUtilsExceptions.*;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vatsa on 06/01/16.
@@ -515,6 +513,43 @@ public abstract class ArrayUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Takes any number of arrays/arrayLists and returns an arrayList with all unique objects.
+     * <b>WILL NOT PRESERVE ELEMENT ORDER.</b>
+     * @param arrayObjects any number of arrays/lists to unionize.
+     * @return a list of all elements with no duplicates.
+     * @throws ObjectListCastException
+     * @throws UnionArgumentException
+     */
+    public static List union(Object... arrayObjects) throws ObjectListCastException, UnionArgumentException {
+
+        Set elements = new HashSet();
+
+        for(Object arrayObject : arrayObjects) {
+
+            Class arrayClass = arrayObject.getClass().getComponentType();
+            List result = null;
+
+            if (arrayClass != null) {
+                if (arrayClass.isPrimitive() || arrayObject.getClass().isArray()) {
+                    result = toObjectArrayList(arrayObject);
+                }
+            } else if (arrayObject instanceof List) {
+                result = (List) arrayObject;
+            } else {
+                throw new UnionArgumentException();
+            }
+
+            Iterator it = result.iterator();
+
+            while(it.hasNext()) {
+                elements.add(it.next());
+            }
+        }
+
+        return new ArrayList(elements);
     }
 }
 
